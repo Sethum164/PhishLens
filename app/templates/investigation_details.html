@@ -1,0 +1,446 @@
+
+{% extends "base.html" %}
+
+{% block title %}Investigation #{{ investigation.id }} | PhishLens{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4 investigation-details-page">
+
+    <!-- Investigation Heading and Actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>Investigation #{{ investigation.id }}</h2>
+            <p class="text-muted">Complete email investigation report</p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a href="{{ url_for('analyzer.history') }}"
+               class="btn btn-outline-secondary">
+                Back to History
+            </a>
+
+            <a href="{{ url_for(
+                'reports.generate_report',
+                investigation_id=investigation.id
+            ) }}" class="btn btn-danger">
+                Download PDF Report
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Overall Risk Assessment -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body text-center">
+
+            <h5>Overall Risk Assessment</h5>
+
+            <h1 class="display-4 fw-bold">
+                {{ investigation.risk_score }}/100
+            </h1>
+
+            <span class="badge
+                {% if investigation.risk_level == 'Critical' %}bg-danger
+                {% elif investigation.risk_level == 'High' %}bg-warning text-dark
+                {% elif investigation.risk_level == 'Medium' %}bg-info text-dark
+                {% else %}bg-success{% endif %} fs-5">
+
+                {{ investigation.risk_level }} Risk
+
+            </span>
+
+            <p class="text-muted mt-3 mb-0">
+                Risk score calculated using detected email security indicators.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Investigation Information -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Investigation Information</h5>
+        </div>
+
+        <div class="card-body">
+
+            <p><strong>Investigation ID:</strong> #{{ investigation.id }}</p>
+            <p><strong>Analyst ID:</strong> {{ investigation.user_id }}</p>
+           <p>
+    <strong>Status:</strong>
+
+    <span class="badge
+        {% if investigation.status == 'New' %}bg-primary
+        {% elif investigation.status == 'In Progress' %}bg-warning text-dark
+        {% elif investigation.status == 'Resolved' %}bg-success
+        {% elif investigation.status == 'False Positive' %}bg-secondary
+        {% endif %}">
+
+        {{ investigation.status }}
+
+    </span>
+</p>
+
+            <p class="mb-0">
+                <strong>Created:</strong> {{ investigation.created_at }}
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Investigation Management -->
+    <div class="card mb-4 shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">Investigation Management</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST"
+                  action="{{ url_for(
+                      'analyzer.update_investigation',
+                      investigation_id=investigation.id
+                  ) }}">
+
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <div class="mb-3">
+
+                    <label for="status" class="form-label">
+                        Investigation Status
+                    </label>
+
+                    <select class="form-select"
+                            id="status"
+                            name="status"
+                            required>
+
+                        <option value="New"
+                            {% if investigation.status == "New" %}selected{% endif %}>
+                            New
+                        </option>
+
+                        <option value="In Progress"
+                            {% if investigation.status == "In Progress" %}selected{% endif %}>
+                            In Progress
+                        </option>
+
+                        <option value="Resolved"
+                            {% if investigation.status == "Resolved" %}selected{% endif %}>
+                            Resolved
+                        </option>
+
+                        <option value="False Positive"
+                            {% if investigation.status == "False Positive" %}selected{% endif %}>
+                            False Positive
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label for="analyst_notes" class="form-label">
+                        Analyst Investigation Notes
+                    </label>
+
+                    <textarea
+                        class="form-control"
+                        id="analyst_notes"
+                        name="analyst_notes"
+                        rows="5"
+                        maxlength="5000"
+                        placeholder="Enter investigation findings, observations, and actions taken...">{{ investigation.analyst_notes or "" }}</textarea>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save Investigation
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Email Information -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Email Information</h5>
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+                <tbody>
+
+                    <tr>
+                        <th>From</th>
+                        <td>{{ email.get("from") or "Not available" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>To</th>
+                        <td>{{ email.get("to") or "Not available" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Subject</th>
+                        <td>{{ email.get("subject") or "Not available" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Date</th>
+                        <td>{{ email.get("date") or "Not available" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Reply-To</th>
+                        <td>{{ email.get("reply_to") or "Not available" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Return-Path</th>
+                        <td>{{ email.get("return_path") or "Not available" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Message-ID</th>
+                        <td>{{ email.get("message_id") or "Not available" }}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <!-- Detected Risk Factors -->
+    <div class="card mb-4 shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">Detected Risk Factors</h5>
+        </div>
+
+        <div class="card-body">
+
+            {% set risk_factors = email.get("risk_analysis", {}).get("risk_factors", []) %}
+
+            {% if risk_factors %}
+
+                <div class="list-group">
+
+                    {% for item in risk_factors %}
+
+                        <div class="list-group-item">
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <strong>
+                                    {{ item.get("factor", "Unknown risk factor") }}
+                                </strong>
+
+                                <span class="badge bg-danger">
+                                    {{ item.get("points", 0) }} points
+                                </span>
+
+                            </div>
+
+                            {% if item.get("url") %}
+                                <p class="mb-1 mt-2">
+                                    <strong>URL:</strong>
+                                    <code>{{ item.get("url") }}</code>
+                                </p>
+                            {% endif %}
+
+                            {% if item.get("filename") %}
+                                <p class="mb-1 mt-2">
+                                    <strong>Filename:</strong>
+                                    <code>{{ item.get("filename") }}</code>
+                                </p>
+                            {% endif %}
+
+                            {% if item.get("findings") %}
+                                <p class="mb-1 mt-2">
+                                    <strong>Findings:</strong>
+                                </p>
+
+                                <ul class="mb-0">
+                                    {% for finding in item.get("findings", []) %}
+                                        <li>{{ finding }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="text-muted mb-0">
+                    No risk factors detected.
+                </p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Extracted URLs -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Extracted URLs</h5>
+        </div>
+
+        <div class="card-body">
+
+            {% if email.get("urls") %}
+
+                <ul>
+                    {% for url in email.get("urls", []) %}
+                        <li><code>{{ url }}</code></li>
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+
+                <p class="text-muted mb-0">No URLs detected.</p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Extracted Domains -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Extracted Domains</h5>
+        </div>
+
+        <div class="card-body">
+
+            {% if email.get("domains") %}
+
+                <ul>
+                    {% for domain in email.get("domains", []) %}
+                        <li><code>{{ domain }}</code></li>
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+
+                <p class="text-muted mb-0">No domains detected.</p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Extracted IP Addresses -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Extracted IP Addresses</h5>
+        </div>
+
+        <div class="card-body">
+
+            {% if email.get("ip_addresses") %}
+
+                <ul>
+                    {% for ip in email.get("ip_addresses", []) %}
+                        <li><code>{{ ip }}</code></li>
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+
+                <p class="text-muted mb-0">No IP addresses detected.</p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Email Body -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Email Body</h5>
+        </div>
+
+        <div class="card-body">
+
+            <pre class="bg-light p-3 rounded text-wrap">{{ email.get("body") or "No email body available." }}</pre>
+
+        </div>
+    </div>
+
+    <!-- Attachment Analysis -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Attachment Analysis</h5>
+        </div>
+
+        <div class="card-body">
+
+            {% set attachments = email.get("attachments", []) %}
+
+            {% if attachments %}
+
+                <p>
+                    <strong>Total Attachments:</strong>
+                    {{ attachments | length }}
+                </p>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered">
+
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Content Type</th>
+                                <th>Size (Bytes)</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for attachment in attachments %}
+
+                                <tr>
+                                    <td>{{ attachment.get("filename", "Unknown") }}</td>
+                                    <td>{{ attachment.get("content_type", "Unknown") }}</td>
+                                    <td>{{ attachment.get("size", 0) }}</td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <p class="text-muted mb-0">No attachments detected.</p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,313 @@
+
+{% extends "base.html" %}
+
+{% block title %}Email Analysis | PhishLens{% endblock %}
+
+{% block content %}
+
+<div class="container py-5 upload-page">
+
+    <!-- Page Header -->
+    <div class="upload-page-header mb-4">
+        <div>
+            <div class="upload-eyebrow">
+                <span class="upload-status-dot"></span>
+                SECURITY OPERATIONS CENTER
+            </div>
+
+            <h2 class="upload-page-title">Email Threat Analysis</h2>
+
+            <p class="upload-page-subtitle">
+                Submit suspicious email files for automated phishing detection
+                and security investigation.
+            </p>
+        </div>
+
+        <div class="upload-header-tag">
+            <span>✉</span>
+            EMAIL ANALYSIS
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show"
+                 role="alert">
+                {{ message }}
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="row g-4">
+
+        <!-- Main Upload Panel -->
+        <div class="col-lg-8">
+
+            <div class="upload-main-card">
+
+                <div class="upload-card-heading">
+                    <div class="upload-icon-box">↑</div>
+
+                    <div>
+                        <h4>Upload Suspicious Email</h4>
+                        <p>Select an email file to begin the investigation.</p>
+                    </div>
+                </div>
+
+                <form method="POST"
+                      enctype="multipart/form-data"
+                      id="emailUploadForm">
+
+                    <input type="hidden"
+                           name="csrf_token"
+                           value="{{ csrf_token() }}">
+
+                    <label for="email_file" class="upload-drop-zone">
+
+                        <div class="upload-cloud-icon">
+                            <svg width="54" height="54"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="1.5"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="M12 16V4"/>
+                                <path d="m7 9 5-5 5 5"/>
+                                <path d="M20 16.5v2A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5v-2"/>
+                            </svg>
+                        </div>
+
+                        <h5>Choose an email file</h5>
+
+                        <p>
+                            Click here to browse your computer
+                        </p>
+
+                        <span class="upload-browse-label">
+                            Browse Files
+                        </span>
+
+                        <span class="upload-file-requirement">
+                            Supported format: .eml
+                        </span>
+
+                    </label>
+
+                    <input
+                        type="file"
+                        id="email_file"
+                        name="email_file"
+                        accept=".eml"
+                        required
+                        class="upload-file-input"
+                    >
+
+                    <div id="selectedFileInfo"
+                         class="selected-file-info"
+                         aria-live="polite">
+
+                        <span class="selected-file-icon">✉</span>
+
+                        <div class="selected-file-details">
+                            <strong id="selectedFileName">No file selected</strong>
+                            <span id="selectedFileSize">
+                                Select an .eml file to continue.
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="upload-requirements">
+                        <div>
+                            <span>✓</span>
+                            Only .eml files accepted
+                        </div>
+
+                        <div>
+                            <span>✓</span>
+                            Maximum file size: 5 MB
+                        </div>
+
+                        <div>
+                            <span>✓</span>
+                            Secure server-side validation
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="upload-submit-btn"
+                            id="analyzeButton">
+
+                        <span>Analyze Email</span>
+                        <span class="upload-button-arrow">→</span>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- Information Panel -->
+        <div class="col-lg-4">
+
+            <div class="upload-info-card">
+
+                <div class="upload-info-heading">
+                    <span class="upload-info-symbol">⌕</span>
+                    <h5>Analysis Capabilities</h5>
+                </div>
+
+                <p class="upload-info-intro">
+                    PhishLens examines multiple email security indicators
+                    to support phishing investigations.
+                </p>
+
+                <div class="upload-capability">
+
+                    <span class="capability-icon">◎</span>
+
+                    <div>
+                        <strong>Email Header Analysis</strong>
+                        <p>Review sender information and authentication indicators.</p>
+                    </div>
+
+                </div>
+
+                <div class="upload-capability">
+
+                    <span class="capability-icon">⌘</span>
+
+                    <div>
+                        <strong>IOC Extraction</strong>
+                        <p>Identify suspicious URLs, domains and IP addresses.</p>
+                    </div>
+
+                </div>
+
+                <div class="upload-capability">
+
+                    <span class="capability-icon">⚑</span>
+
+                    <div>
+                        <strong>Threat Intelligence</strong>
+                        <p>Examine available threat indicators and domain information.</p>
+                    </div>
+
+                </div>
+
+                <div class="upload-capability">
+
+                    <span class="capability-icon">◈</span>
+
+                    <div>
+                        <strong>Risk Assessment</strong>
+                        <p>Calculate a risk score based on detected security indicators.</p>
+                    </div>
+
+                </div>
+
+                <div class="upload-security-note">
+                    <span>🔒</span>
+
+                    <div>
+                        <strong>Security Notice</strong>
+                        <p>
+                            Email files are processed for analysis.
+                            Never upload real confidential emails or sensitive
+                            personal information without authorization.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Workflow -->
+    <div class="upload-workflow-card mt-4">
+
+        <h5>Investigation Workflow</h5>
+
+        <div class="upload-workflow-steps">
+
+            <div class="workflow-step active">
+                <span>01</span>
+                <strong>Upload Email</strong>
+                <small>Submit .eml file</small>
+            </div>
+
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+                <span>02</span>
+                <strong>Analyze Threats</strong>
+                <small>Inspect security indicators</small>
+            </div>
+
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+                <span>03</span>
+                <strong>Review Results</strong>
+                <small>Investigate risk findings</small>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fileInput = document.getElementById("email_file");
+    const fileName = document.getElementById("selectedFileName");
+    const fileSize = document.getElementById("selectedFileSize");
+    const analyzeButton = document.getElementById("analyzeButton");
+    const uploadForm = document.getElementById("emailUploadForm");
+
+    fileInput.addEventListener("change", function () {
+
+        if (fileInput.files.length > 0) {
+
+            const file = fileInput.files[0];
+
+            fileName.textContent = file.name;
+            fileSize.textContent =
+                (file.size / (1024 * 1024)).toFixed(2) + " MB";
+
+        } else {
+
+            fileName.textContent = "No file selected";
+            fileSize.textContent = "Select an .eml file to continue.";
+
+        }
+
+    });
+
+    uploadForm.addEventListener("submit", function () {
+
+        if (fileInput.files.length > 0) {
+            analyzeButton.disabled = true;
+            analyzeButton.querySelector("span").textContent =
+                "Submitting email...";
+        }
+
+    });
+
+});
+</script>
+
+{% endblock %}

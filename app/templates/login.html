@@ -1,0 +1,176 @@
+
+{% extends "base.html" %}
+
+{% block title %}Login | PhishLens{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="login-wrapper mx-auto">
+
+        <div class="row g-0 login-panel">
+
+            <!-- LEFT BRANDING SECTION -->
+            <div class="col-lg-6 login-brand-section">
+
+                <div class="login-brand-content">
+
+                    <div class="login-brand-logo">
+                        <span class="login-logo-icon">⌑</span>
+                        <span><span class="text-primary">Phish</span>Lens</span>
+                    </div>
+
+                    <div class="login-platform-label">
+                        SECURITY OPERATIONS PLATFORM
+                    </div>
+
+                    <h1 class="login-heading">
+                        Welcome back.
+                        <span>Stay ahead of threats.</span>
+                    </h1>
+
+                    <p class="login-description">
+                        Access your security investigation workspace.
+                        Analyze suspicious emails, identify potential
+                        threats and manage your SOC investigations.
+                    </p>
+
+                    <div class="login-benefits">
+
+                        <div class="login-benefit">
+                            <span>✓</span>
+                            <div>
+                                <strong>Email Threat Analysis</strong>
+                                <small>Analyze suspicious email messages</small>
+                            </div>
+                        </div>
+
+                        <div class="login-benefit">
+                            <span>✓</span>
+                            <div>
+                                <strong>IOC Detection</strong>
+                                <small>Identify suspicious URLs and domains</small>
+                            </div>
+                        </div>
+
+                        <div class="login-benefit">
+                            <span>✓</span>
+                            <div>
+                                <strong>SOC Investigation</strong>
+                                <small>Track findings and generate reports</small>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="login-brand-footer">
+                        PHISHLENS · EMAIL SECURITY INTELLIGENCE
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT LOGIN FORM -->
+            <div class="col-lg-6 login-form-section">
+
+                <div class="login-form-content">
+
+                    <div class="login-form-icon">🔐</div>
+
+                    <h2>Sign in to PhishLens</h2>
+
+                    <p class="login-form-subtitle">
+                        Enter your credentials to access your account.
+                    </p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show"
+                                 role="alert">
+                                {{ message }}
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+
+                    <form method="POST">
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <div class="mb-4">
+
+                            <label class="form-label" for="username_or_email">
+                                Username or Email
+                            </label>
+
+                            <input
+                                type="text"
+                                id="username_or_email"
+                                name="username_or_email"
+                                class="form-control login-input"
+                                placeholder="Enter your username or email"
+                                required
+                                autocomplete="username"
+                                autofocus
+                            >
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label" for="password">
+                                Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="form-control login-input"
+                                placeholder="Enter your password"
+                                required
+                                autocomplete="current-password"
+                            >
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100 login-submit-btn"
+                        >
+                            Sign In to PhishLens
+                            <span class="ms-2">→</span>
+                        </button>
+
+                    </form>
+
+                    <div class="login-register-link">
+                        Don't have an account?
+                        <a href="{{ url_for('auth.register') }}">
+                            Create an account
+                        </a>
+                    </div>
+
+                    <div class="login-security-note">
+                        <span>🛡</span>
+                        Secure access to your SOC workspace
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

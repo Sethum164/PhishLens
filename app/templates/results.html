@@ -1,0 +1,531 @@
+
+{% extends "base.html" %}
+
+{% block title %}Analysis Results | PhishLens{% endblock %}
+
+{% block content %}
+
+<div class="container py-5 results-page">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">Email Investigation Results</h2>
+        <p class="text-secondary">
+            Phishing detection and security analysis report.
+        </p>
+    </div>
+
+    {% set risk = email.get("risk_analysis", {}) %}
+    {% set score = risk.get("risk_score", 0) %}
+    {% set level = risk.get("risk_level", "Unknown") %}
+
+    {% if level == "Critical" %}
+        {% set risk_color = "danger" %}
+    {% elif level == "High" %}
+        {% set risk_color = "warning" %}
+    {% elif level == "Medium" %}
+        {% set risk_color = "info" %}
+    {% else %}
+        {% set risk_color = "success" %}
+    {% endif %}
+
+    <!-- Overall Risk Assessment -->
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="fw-bold">Overall Risk Assessment</h5>
+                <h1 class="display-4 fw-bold text-{{ risk_color }}">
+                    {{ score }}/100
+                </h1>
+                <span class="badge bg-{{ risk_color }} fs-6">
+                    {{ level }} Risk
+                </span>
+                <p class="text-secondary mt-3 mb-0">
+                    Risk score calculated using detected email security indicators.
+                </p>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <h6 class="text-secondary">Risk Classification</h6>
+                <div class="progress" style="height: 15px;">
+                    <div class="progress-bar bg-{{ risk_color }}"
+                         role="progressbar"
+                         style="width: {{ score }}%;"
+                         aria-valuenow="{{ score }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Information -->
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Email Information</h5>
+
+        <table class="table table-bordered">
+            <tbody>
+                <tr><th>From</th><td>{{ email.get("from") or "Not available" }}</td></tr>
+                <tr><th>To</th><td>{{ email.get("to") or "Not available" }}</td></tr>
+                <tr><th>Subject</th><td>{{ email.get("subject") or "No subject" }}</td></tr>
+                <tr><th>Date</th><td>{{ email.get("date") or "Not available" }}</td></tr>
+                <tr><th>Reply-To</th><td>{{ email.get("reply_to") or "Not available" }}</td></tr>
+                <tr><th>Return-Path</th><td>{{ email.get("return_path") or "Not available" }}</td></tr>
+                <tr><th>Message-ID</th><td>{{ email.get("message_id") or "Not available" }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Header Analysis -->
+    {% set header = email.get("header_analysis", {}) %}
+    {% set auth = header.get("authentication_analysis", {}) %}
+    {% set reply = header.get("reply_to_analysis", {}) %}
+    {% set return_path = header.get("return_path_analysis", {}) %}
+
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Email Header Analysis</h5>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr><th>Security Check</th><th>Result</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Reply-To Domain Mismatch</td>
+                    <td>
+                        {% if reply.get("mismatch") %}
+                            <span class="badge bg-danger">Mismatch Detected</span>
+                        {% else %}
+                            <span class="badge bg-success">No Mismatch Detected</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Return-Path Domain Mismatch</td>
+                    <td>
+                        {% if return_path.get("mismatch") %}
+                            <span class="badge bg-danger">Mismatch Detected</span>
+                        {% else %}
+                            <span class="badge bg-success">No Mismatch Detected</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr><td>SPF</td><td>{{ auth.get("spf", "unknown")|upper }}</td></tr>
+                <tr><td>DKIM</td><td>{{ auth.get("dkim", "unknown")|upper }}</td></tr>
+                <tr><td>DMARC</td><td>{{ auth.get("dmarc", "unknown")|upper }}</td></tr>
+            </tbody>
+        </table>
+
+        <h6 class="fw-bold mt-3">Received Headers</h6>
+
+        {% for received in header.get("received_analysis", {}).get("received_headers", []) %}
+            <div class="border rounded p-2 mb-2 small">{{ received }}</div>
+        {% else %}
+            <p class="text-secondary">No Received headers found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- IOC Analysis -->
+    {% set ioc = email.get("ioc_analysis", {}) %}
+    {% set url_data = ioc.get("url_analysis", {}) %}
+    {% set domain_data = ioc.get("domain_analysis", {}) %}
+    {% set ip_data = ioc.get("ip_analysis", {}) %}
+    {% set dns_data = ioc.get("dns_analysis", {}) %}
+    {% set threat_data = ioc.get("threat_intelligence_analysis", {}) %}
+    {% set domain_threat_data = ioc.get("domain_threat_analysis", {}) %}
+
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Indicators of Compromise (IOCs)</h5>
+
+        <div class="row text-center mb-4">
+            <div class="col-md-4">
+                <h3 class="fw-bold">{{ url_data.get("total_urls", 0) }}</h3>
+                <p class="text-secondary">URLs Found</p>
+            </div>
+            <div class="col-md-4">
+                <h3 class="fw-bold">{{ domain_data.get("total_domains", 0) }}</h3>
+                <p class="text-secondary">Domains Found</p>
+            </div>
+            <div class="col-md-4">
+                <h3 class="fw-bold">{{ ip_data.get("total_ips", 0) }}</h3>
+                <p class="text-secondary">IP Addresses Found</p>
+            </div>
+        </div>
+
+        <!-- Extracted URLs -->
+        <h6 class="fw-bold">Extracted URLs</h6>
+
+        {% for item in url_data.get("urls", []) %}
+            <div class="border rounded p-3 mb-2">
+                <p class="mb-1 text-break">
+                    <strong>{{ item.get("url") }}</strong>
+                </p>
+                <p class="small text-secondary mb-1">
+                    Protocol: {{ item.get("protocol") }}
+                </p>
+                {% for warning in item.get("warnings", []) %}
+                    <span class="badge bg-warning text-dark mb-1">{{ warning }}</span>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-secondary">No URLs detected.</p>
+        {% endfor %}
+
+        <!-- Extracted Domains -->
+        <h6 class="fw-bold mt-4">Extracted Domains</h6>
+
+        {% for item in domain_data.get("domains", []) %}
+            <div class="border rounded p-2 mb-2">{{ item.get("domain") }}</div>
+        {% else %}
+            <p class="text-secondary">No domains detected.</p>
+        {% endfor %}
+
+        <!-- Extracted IP Addresses -->
+        <h6 class="fw-bold mt-4">Extracted IP Addresses</h6>
+
+        {% for item in ip_data.get("ip_addresses", []) %}
+            <div class="border rounded p-2 mb-2">
+                {{ item.get("ip_address") }}
+                <span class="badge bg-secondary">{{ item.get("type") }}</span>
+            </div>
+        {% else %}
+            <p class="text-secondary">No IP addresses detected.</p>
+        {% endfor %}
+
+        <!-- DNS Intelligence -->
+        <hr class="my-4">
+
+        <h5 class="fw-bold mb-3">DNS Intelligence</h5>
+        <p class="text-secondary small">
+            DNS records retrieved for domains extracted from the email.
+        </p>
+
+        {% for item in dns_data.get("dns_results", []) %}
+            <div class="border rounded p-3 mb-3">
+                <h6 class="fw-bold text-primary">
+                    Domain: {{ item.get("domain") }}
+                </h6>
+
+                <p class="fw-semibold mt-3 mb-1">A Records (IPv4)</p>
+                {% for record in item.get("a_records", []) %}
+                    <div class="small border rounded p-2 mb-1">{{ record }}</div>
+                {% else %}
+                    <p class="text-secondary small">No A records found.</p>
+                {% endfor %}
+
+                <p class="fw-semibold mt-3 mb-1">AAAA Records (IPv6)</p>
+                {% for record in item.get("aaaa_records", []) %}
+                    <div class="small border rounded p-2 mb-1">{{ record }}</div>
+                {% else %}
+                    <p class="text-secondary small">No AAAA records found.</p>
+                {% endfor %}
+
+                <p class="fw-semibold mt-3 mb-1">MX Records (Mail Servers)</p>
+                {% for record in item.get("mx_records", []) %}
+                    <div class="small border rounded p-2 mb-1">{{ record }}</div>
+                {% else %}
+                    <p class="text-secondary small">No MX records found.</p>
+                {% endfor %}
+
+                <p class="fw-semibold mt-3 mb-1">NS Records (Name Servers)</p>
+                {% for record in item.get("ns_records", []) %}
+                    <div class="small border rounded p-2 mb-1">{{ record }}</div>
+                {% else %}
+                    <p class="text-secondary small">No NS records found.</p>
+                {% endfor %}
+
+                {% if item.get("errors") %}
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <strong>DNS Lookup Messages:</strong>
+                        <ul class="mb-0">
+                            {% for error in item.get("errors", []) %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="text-secondary">No domain names available for DNS analysis.</p>
+        {% endfor %}
+
+        <!-- Domain Threat Analysis -->
+        <hr class="my-4">
+
+        <h5 class="fw-bold mb-2">Domain Threat Analysis</h5>
+
+        <p class="text-secondary small">
+            Domains are checked for suspicious characteristics such as
+            lookalike brand names, unusual TLDs, Punycode, excessive
+            subdomains, and unusual naming patterns. These are heuristic
+            indicators and do not prove that a domain is malicious.
+        </p>
+
+        <div class="row text-center mb-3">
+            <div class="col-md-6">
+                <h4 class="fw-bold">
+                    {{ domain_threat_data.get("total_domains_analyzed", 0) }}
+                </h4>
+                <p class="text-secondary">Domains Analyzed</p>
+            </div>
+            <div class="col-md-6">
+                <h4 class="fw-bold">
+                    {{ domain_threat_data.get("domain_results", [])|length }}
+                </h4>
+                <p class="text-secondary">Analysis Results</p>
+            </div>
+        </div>
+
+        {% for item in domain_threat_data.get("domain_results", []) %}
+
+            {% set domain_score = item.get("risk_score", 0) %}
+            {% set domain_level = item.get("risk_level", "Unknown") %}
+
+            {% if domain_level == "High" %}
+                {% set domain_color = "danger" %}
+            {% elif domain_level == "Medium" %}
+                {% set domain_color = "warning" %}
+            {% elif domain_level == "Low" %}
+                {% set domain_color = "success" %}
+            {% else %}
+                {% set domain_color = "secondary" %}
+            {% endif %}
+
+            <div class="border rounded p-3 mb-3">
+
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <h6 class="fw-bold text-break">
+                        {{ item.get("domain") }}
+                    </h6>
+
+                    <span class="badge bg-{{ domain_color }}">
+                        {{ domain_level }} Risk
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <strong>Domain Threat Score</strong>
+                    <strong>{{ domain_score }}/100</strong>
+                </div>
+
+                <div class="progress mt-2 mb-3" style="height: 10px;">
+                    <div class="progress-bar bg-{{ domain_color }}"
+                         role="progressbar"
+                         style="width: {{ domain_score }}%;"
+                         aria-valuenow="{{ domain_score }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+
+                <p class="fw-semibold mb-2">Detected Indicators</p>
+
+                {% for finding in item.get("findings", []) %}
+                    <div class="alert alert-warning py-2 mb-2 small">
+                        {{ finding }}
+                    </div>
+                {% else %}
+                    <p class="text-success small">
+                        No suspicious indicators detected by local rules.
+                    </p>
+                {% endfor %}
+
+                <p class="small text-secondary mb-0">
+                    {{ item.get("status") }}
+                </p>
+
+            </div>
+
+        {% else %}
+            <p class="text-secondary">
+                No domains available for domain threat analysis.
+            </p>
+        {% endfor %}
+
+        <!-- Local Threat Intelligence -->
+        <hr class="my-4">
+
+        <h5 class="fw-bold mb-2">Local Threat Intelligence</h5>
+
+        <p class="text-secondary small">
+            URLs are checked using local heuristic rules. These results
+            are indicators for investigation, not verified threat
+            intelligence reputation results.
+        </p>
+
+        <div class="row text-center mb-3">
+            <div class="col-md-6">
+                <h4 class="fw-bold">
+                    {{ threat_data.get("total_urls_analyzed", 0) }}
+                </h4>
+                <p class="text-secondary">URLs Analyzed</p>
+            </div>
+            <div class="col-md-6">
+                <h4 class="fw-bold">
+                    {{ threat_data.get("url_results", [])|length }}
+                </h4>
+                <p class="text-secondary">Analysis Results</p>
+            </div>
+        </div>
+
+        {% for item in threat_data.get("url_results", []) %}
+
+            {% set threat_score = item.get("risk_score", 0) %}
+            {% set threat_level = item.get("risk_level", "Unknown") %}
+
+            {% if threat_level == "High" %}
+                {% set threat_color = "danger" %}
+            {% elif threat_level == "Medium" %}
+                {% set threat_color = "warning" %}
+            {% else %}
+                {% set threat_color = "success" %}
+            {% endif %}
+
+            <div class="border rounded p-3 mb-3">
+
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <h6 class="fw-bold text-break">
+                        {{ item.get("url") }}
+                    </h6>
+
+                    <span class="badge bg-{{ threat_color }}">
+                        {{ threat_level }} Risk
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <strong>Threat Score</strong>
+                    <strong>{{ threat_score }}/100</strong>
+                </div>
+
+                <div class="progress mt-2 mb-3" style="height: 10px;">
+                    <div class="progress-bar bg-{{ threat_color }}"
+                         role="progressbar"
+                         style="width: {{ threat_score }}%;"
+                         aria-valuenow="{{ threat_score }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+
+                <p class="small mb-2">
+                    <strong>Domain:</strong>
+                    {{ item.get("domain") or "Not available" }}
+                </p>
+
+                <p class="fw-semibold mb-2">Detected Indicators</p>
+
+                {% for finding in item.get("findings", []) %}
+                    <div class="alert alert-warning py-2 mb-2 small">
+                        {{ finding }}
+                    </div>
+                {% else %}
+                    <p class="text-success small">
+                        No suspicious indicators detected by local rules.
+                    </p>
+                {% endfor %}
+
+                <p class="small text-secondary mb-0">
+                    {{ item.get("status") }}
+                </p>
+
+            </div>
+
+        {% else %}
+            <p class="text-secondary">
+                No URLs available for threat intelligence analysis.
+            </p>
+        {% endfor %}
+
+    </div>
+
+    <!-- Attachment Analysis -->
+    {% set attachment_data = email.get("attachment_analysis", {}) %}
+
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Attachment Analysis</h5>
+
+        <p>
+            Total Attachments:
+            <strong>{{ attachment_data.get("total_attachments", 0) }}</strong>
+        </p>
+
+        {% for item in attachment_data.get("attachments", []) %}
+            <div class="border rounded p-3 mb-2">
+                <h6 class="fw-bold">
+                    {{ item.get("filename") or "Unnamed attachment" }}
+                </h6>
+                <p class="small text-secondary mb-1">
+                    Content Type: {{ item.get("content_type") }}
+                </p>
+                <p class="small text-secondary mb-1">
+                    Size: {{ item.get("size", 0) }} bytes
+                </p>
+
+                {% if item.get("suspicious") %}
+                    <span class="badge bg-danger">Suspicious Extension</span>
+                {% else %}
+                    <span class="badge bg-success">No Suspicious Extension Detected</span>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="text-secondary">No attachments found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Risk Factors -->
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Detected Risk Factors</h5>
+
+        {% for factor in risk.get("risk_factors", []) %}
+            <div class="border-start border-danger border-4 p-3 mb-2 bg-light">
+                <div class="d-flex justify-content-between flex-wrap">
+                    <strong>{{ factor.get("factor") }}</strong>
+                    <span class="badge bg-danger">
+                        +{{ factor.get("points") }} Points
+                    </span>
+                </div>
+
+                {% if factor.get("url") %}
+                    <p class="small text-secondary mt-2 mb-0 text-break">
+                        URL: {{ factor.get("url") }}
+                    </p>
+                {% endif %}
+
+                {% if factor.get("filename") %}
+                    <p class="small text-secondary mt-2 mb-0">
+                        File: {{ factor.get("filename") }}
+                    </p>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="text-success">
+                No risk indicators detected by the current rules.
+            </p>
+        {% endfor %}
+    </div>
+
+    <!-- Navigation -->
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('analyzer.analyze') }}"
+           class="btn btn-primary">
+            Analyze Another Email
+        </a>
+
+        <a href="{{ url_for('dashboard.dashboard') }}"
+           class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <p class="text-secondary small mt-4">
+        PhishLens uses heuristic indicators. A detected warning does not
+        independently prove that an email or attachment is malicious.
+        DNS records provide investigation context and do not independently
+        establish whether a domain is malicious. Local threat scores are
+        not verified external reputation scores.
+    </p>
+
+</div>
+
+{% endblock %}

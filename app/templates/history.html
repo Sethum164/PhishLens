@@ -1,0 +1,302 @@
+
+{% extends "base.html" %}
+
+{% block title %}Investigation History - PhishLens{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4 history-page">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Investigation History</h2>
+            <p class="text-muted">
+                View your previously analyzed emails and investigation records.
+            </p>
+        </div>
+
+        <a href="{{ url_for('analyzer.analyze') }}" class="btn btn-primary">
+            Analyze New Email
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            {% if investigations %}
+
+            <!-- Search and filters -->
+            <div class="row g-3 mb-3">
+
+                <div class="col-md-3">
+                    <label for="investigationSearch" class="form-label">
+                        Search Investigations
+                    </label>
+
+                    <input
+                        type="text"
+                        id="investigationSearch"
+                        class="form-control"
+                        placeholder="Search sender or subject..."
+                    >
+                </div>
+
+                <div class="col-md-3">
+                    <label for="riskFilter" class="form-label">
+                        Filter by Risk Level
+                    </label>
+
+                    <select id="riskFilter" class="form-select">
+                        <option value="all">All Risk Levels</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="statusFilter" class="form-label">
+                        Filter by Status
+                    </label>
+
+                    <select id="statusFilter" class="form-select">
+                        <option value="all">All Statuses</option>
+                        <option value="new">New</option>
+                        <option value="in progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="false positive">False Positive</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="sortOrder" class="form-label">
+                        Sort by Risk Score
+                    </label>
+
+                    <select id="sortOrder" class="form-select">
+                        <option value="default">Newest First</option>
+                        <option value="high">Highest Risk First</option>
+                        <option value="low">Lowest Risk First</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Investigation table -->
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Sender</th>
+                            <th>Subject</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="investigationTable">
+
+                        {% for item in investigations %}
+
+                        <tr
+                            data-risk="{{ item.risk_level|lower }}"
+                            data-status="{{ item.status|lower }}"
+                            data-score="{{ item.risk_score }}"
+                            data-date="{{ item.created_at.timestamp() if item.created_at else 0 }}"
+                        >
+
+                            <td>
+                                <a
+                                    href="{{ url_for('analyzer.investigation_details', investigation_id=item.id) }}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    View #{{ item.id }}
+                                </a>
+                            </td>
+
+                            <td>{{ item.sender or "Unknown" }}</td>
+
+                            <td>{{ item.subject or "No Subject" }}</td>
+
+                            <td>{{ item.risk_score }}/100</td>
+
+                            <td>
+                                {% if item.risk_level == "Critical" %}
+                                    <span class="badge bg-danger">Critical</span>
+                                {% elif item.risk_level == "High" %}
+                                    <span class="badge bg-warning text-dark">High</span>
+                                {% elif item.risk_level == "Medium" %}
+                                    <span class="badge bg-info text-dark">Medium</span>
+                                {% else %}
+                                    <span class="badge bg-success">Low</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+    {% if item.status == "New" %}
+        <span class="badge bg-primary">New</span>
+
+    {% elif item.status == "In Progress" %}
+        <span class="badge bg-warning text-dark">In Progress</span>
+
+    {% elif item.status == "Resolved" %}
+        <span class="badge bg-success">Resolved</span>
+
+    {% elif item.status == "False Positive" %}
+        <span class="badge bg-secondary">False Positive</span>
+
+    {% endif %}
+</td>
+                            <td>
+                                {% if item.created_at %}
+                                    {{ item.created_at.strftime("%Y-%m-%d %H:%M") }}
+                                {% else %}
+                                    Not available
+                                {% endif %}
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                <p id="noSearchResults" class="text-center text-muted d-none">
+                    No matching investigations found.
+                </p>
+
+                <p id="searchResultCount" class="text-muted small"></p>
+
+            </div>
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <h5>No Investigations Found</h5>
+
+                    <p class="text-muted">
+                        You have not analyzed any emails yet.
+                    </p>
+
+                    <a href="{{ url_for('analyzer.analyze') }}"
+                       class="btn btn-primary">
+                        Start Your First Investigation
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("investigationSearch");
+    const riskFilter = document.getElementById("riskFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const sortOrder = document.getElementById("sortOrder");
+
+    const tableBody = document.getElementById("investigationTable");
+    const noResults = document.getElementById("noSearchResults");
+    const resultCount = document.getElementById("searchResultCount");
+
+    if (!searchInput || !riskFilter || !statusFilter ||
+        !sortOrder || !tableBody) {
+        return;
+    }
+
+    const rows = Array.from(tableBody.querySelectorAll("tr"));
+
+    function filterInvestigations() {
+
+        const searchValue = searchInput.value.toLowerCase().trim();
+        const selectedRisk = riskFilter.value;
+        const selectedStatus = statusFilter.value;
+        const selectedSort = sortOrder.value;
+
+        let visibleCount = 0;
+
+        rows.forEach(function (row) {
+
+            const sender = row.cells[1].textContent.toLowerCase();
+            const subject = row.cells[2].textContent.toLowerCase();
+
+            const riskLevel = row.dataset.risk;
+            const status = row.dataset.status;
+
+            const matchesSearch =
+                sender.includes(searchValue) ||
+                subject.includes(searchValue);
+
+            const matchesRisk =
+                selectedRisk === "all" ||
+                riskLevel === selectedRisk;
+
+            const matchesStatus =
+                selectedStatus === "all" ||
+                status === selectedStatus;
+
+            const showRow =
+                matchesSearch && matchesRisk && matchesStatus;
+
+            row.classList.toggle("d-none", !showRow);
+
+            if (showRow) {
+                visibleCount++;
+            }
+
+        });
+
+        // Sort all rows while preserving active filters
+        const sortedRows = [...rows];
+
+        if (selectedSort === "high") {
+            sortedRows.sort(function (a, b) {
+                return Number(b.dataset.score) - Number(a.dataset.score);
+            });
+        } else if (selectedSort === "low") {
+            sortedRows.sort(function (a, b) {
+                return Number(a.dataset.score) - Number(b.dataset.score);
+            });
+        } else {
+            sortedRows.sort(function (a, b) {
+                return Number(b.dataset.date) - Number(a.dataset.date);
+            });
+        }
+
+        sortedRows.forEach(function (row) {
+            tableBody.appendChild(row);
+        });
+
+        noResults.classList.toggle("d-none", visibleCount !== 0);
+
+        resultCount.textContent =
+            "Showing " + visibleCount + " of " + rows.length +
+            " investigations";
+
+    }
+
+    searchInput.addEventListener("input", filterInvestigations);
+    riskFilter.addEventListener("change", filterInvestigations);
+    statusFilter.addEventListener("change", filterInvestigations);
+    sortOrder.addEventListener("change", filterInvestigations);
+
+    filterInvestigations();
+
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,299 @@
+
+{% extends "base.html" %}
+
+{% block title %}PhishLens | Cybersecurity Email Intelligence{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="home-hero py-5">
+    <div class="container">
+        <div class="row align-items-center g-5 py-5">
+
+            <div class="col-lg-7">
+
+                <div class="home-label mb-4">
+                    <span class="home-label-dot"></span>
+                    SECURITY OPERATIONS PLATFORM
+                </div>
+
+                <h1 class="home-title">
+                    Detect threats.<br>
+                    <span>Investigate smarter.</span>
+                </h1>
+
+                <p class="home-description mt-4">
+                    Meet PhishLens — a phishing email detection and
+                    investigation platform designed to help security
+                    analysts identify suspicious emails, uncover
+                    indicators of compromise, and assess potential threats.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a href="{{ url_for('analyzer.analyze') }}"
+                       class="btn btn-primary btn-lg home-primary-btn">
+                        Analyze an Email <span class="ms-2">→</span>
+                    </a>
+
+                    <a href="#features"
+                       class="btn btn-outline-primary btn-lg home-secondary-btn">
+                        Explore Features
+                    </a>
+                </div>
+
+                <div class="home-trust-line mt-4">
+                    <span>✓ Email analysis</span>
+                    <span>✓ IOC detection</span>
+                    <span>✓ SOC investigations</span>
+                </div>
+
+            </div>
+
+            <!-- SECURITY VISUAL -->
+            <div class="col-lg-5">
+                <div class="home-visual">
+
+                    <div class="home-visual-top">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="home-shield-icon">⌑</div>
+                            <div>
+                                <div class="home-visual-heading">
+                                    PhishLens Security
+                                </div>
+                                <div class="home-visual-subtitle">
+                                    Threat Intelligence Overview
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="home-live-indicator">
+                            <span></span> ACTIVE
+                        </span>
+                    </div>
+
+                    <div class="home-scan-box mt-4">
+                        <div class="home-scan-icon">✉</div>
+                        <div>
+                            <div class="home-scan-title">
+                                Email Threat Analysis
+                            </div>
+                            <div class="home-scan-description">
+                                Email security analysis capabilities
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="home-metric-grid mt-3">
+
+                        <div class="home-metric">
+                            <div class="home-metric-icon blue">⌕</div>
+                            <div class="home-metric-title">
+                                Header Analysis
+                            </div>
+                            <div class="home-metric-description">
+                                Authentication indicators
+                            </div>
+                        </div>
+
+                        <div class="home-metric">
+                            <div class="home-metric-icon cyan">↗</div>
+                            <div class="home-metric-title">
+                                IOC Detection
+                            </div>
+                            <div class="home-metric-description">
+                                URLs and domains
+                            </div>
+                        </div>
+
+                        <div class="home-metric">
+                            <div class="home-metric-icon purple">◎</div>
+                            <div class="home-metric-title">
+                                Risk Assessment
+                            </div>
+                            <div class="home-metric-description">
+                                Threat scoring
+                            </div>
+                        </div>
+
+                        <div class="home-metric">
+                            <div class="home-metric-icon green">▤</div>
+                            <div class="home-metric-title">
+                                SOC Reports
+                            </div>
+                            <div class="home-metric-description">
+                                Investigation reports
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="home-visual-footer mt-3">
+                        <span>PHISHLENS</span>
+                        <span>EMAIL SECURITY INTELLIGENCE</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- FEATURES SECTION -->
+<section class="home-features py-5" id="features">
+    <div class="container py-4">
+
+        <div class="text-center mb-5">
+            <div class="home-section-label">PLATFORM CAPABILITIES</div>
+
+            <h2 class="home-section-title mt-2">
+                Everything you need to investigate
+            </h2>
+
+            <p class="home-section-description">
+                Analyze suspicious emails through multiple security
+                analysis components and investigation tools.
+            </p>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-6 col-lg-3">
+                <div class="home-feature-card h-100">
+                    <div class="home-feature-icon blue">✉</div>
+                    <h5>Email Analysis</h5>
+                    <p>
+                        Parse suspicious email files and inspect
+                        headers, authentication results and message content.
+                    </p>
+                    <div class="home-feature-number">01</div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="home-feature-card h-100">
+                    <div class="home-feature-icon cyan">⌕</div>
+                    <h5>IOC Detection</h5>
+                    <p>
+                        Extract URLs, domains and IP addresses
+                        to identify potentially suspicious indicators.
+                    </p>
+                    <div class="home-feature-number">02</div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="home-feature-card h-100">
+                    <div class="home-feature-icon purple">◎</div>
+                    <h5>Risk Assessment</h5>
+                    <p>
+                        Evaluate detected security indicators
+                        and calculate an overall email risk score.
+                    </p>
+                    <div class="home-feature-number">03</div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="home-feature-card h-100">
+                    <div class="home-feature-icon green">▤</div>
+                    <h5>SOC Investigation</h5>
+                    <p>
+                        Manage investigations, record analyst notes,
+                        track status and generate PDF reports.
+                    </p>
+                    <div class="home-feature-number">04</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- WORKFLOW SECTION -->
+<section class="home-workflow py-5">
+    <div class="container py-4">
+
+        <div class="text-center mb-5">
+            <div class="home-section-label">SIMPLE WORKFLOW</div>
+
+            <h2 class="home-section-title mt-2">
+                How PhishLens works
+            </h2>
+
+            <p class="home-section-description">
+                From suspicious email to structured security investigation.
+            </p>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="home-step-card">
+                    <div class="home-step-number">01</div>
+                    <h5>Upload an Email</h5>
+                    <p>
+                        Upload a suspicious .eml file
+                        to begin the investigation process.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="home-step-card">
+                    <div class="home-step-number">02</div>
+                    <h5>Analyze Threats</h5>
+                    <p>
+                        Inspect email headers, extract indicators
+                        and evaluate potential security risks.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="home-step-card">
+                    <div class="home-step-number">03</div>
+                    <h5>Investigate & Report</h5>
+                    <p>
+                        Review findings, document analyst notes
+                        and generate security investigation reports.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- FINAL CALL TO ACTION -->
+<section class="home-cta-section py-5">
+    <div class="container py-4">
+
+        <div class="home-cta text-center p-5">
+
+            <div class="home-section-label">
+                START YOUR INVESTIGATION
+            </div>
+
+            <h2 class="mt-3">
+                See beyond the suspicious email.
+            </h2>
+
+            <p class="mt-3">
+                Use PhishLens to analyze email threats
+                and support your security investigations.
+            </p>
+
+            <a href="{{ url_for('analyzer.analyze') }}"
+               class="btn btn-primary btn-lg mt-3 home-primary-btn">
+                Start Email Analysis →
+            </a>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

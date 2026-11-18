@@ -1,0 +1,653 @@
+
+{% extends "base.html" %}
+
+{% block title %}SOC Command Center | PhishLens{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-lg-4 py-4 soc-dashboard">
+
+    <!-- DASHBOARD HEADER -->
+    <div class="soc-dashboard-header mb-4">
+
+        <div>
+            <div class="soc-eyebrow">
+                <span class="soc-live-dot"></span>
+                SECURITY OPERATIONS CENTER
+            </div>
+
+            <h1 class="soc-page-title">SOC Command Center</h1>
+
+            <p class="soc-page-subtitle">
+                Monitor threats, investigate suspicious emails and track security incidents.
+            </p>
+        </div>
+
+        <div class="soc-header-actions">
+
+            <form method="GET" action="{{ url_for('dashboard.dashboard') }}"
+                  class="soc-filter-form">
+
+                <label for="period">REPORTING PERIOD</label>
+
+                <select name="period" id="period"
+                        class="form-select soc-period-select"
+                        onchange="this.form.submit()">
+
+                    <option value="all"
+                        {% if selected_period == "all" %}selected{% endif %}>
+                        All Time
+                    </option>
+
+                    <option value="7"
+                        {% if selected_period == "7" %}selected{% endif %}>
+                        Last 7 Days
+                    </option>
+
+                    <option value="30"
+                        {% if selected_period == "30" %}selected{% endif %}>
+                        Last 30 Days
+                    </option>
+
+                    <option value="90"
+                        {% if selected_period == "90" %}selected{% endif %}>
+                        Last 90 Days
+                    </option>
+
+                </select>
+
+            </form>
+
+            <a href="{{ url_for('reports.generate_dashboard_report', period=selected_period) }}"
+               class="btn soc-export-btn">
+                <span>↓</span> Export PDF
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- SECTION LABEL -->
+    <div class="soc-section-heading mb-3">
+        <div>
+            <h5>Security Overview</h5>
+            <p>Investigation statistics and risk indicators</p>
+        </div>
+        <span class="soc-section-tag">LIVE DATABASE METRICS</span>
+    </div>
+
+
+    <!-- MAIN KPI CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-blue">
+                <div class="soc-stat-top">
+                    <span>Total Emails Analyzed</span>
+                    <span class="soc-stat-icon">✉</span>
+                </div>
+                <div class="soc-stat-value">{{ total_investigations }}</div>
+                <div class="soc-stat-footer">Total investigations recorded</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-red">
+                <div class="soc-stat-top">
+                    <span>Critical Risk</span>
+                    <span class="soc-stat-icon">⚠</span>
+                </div>
+                <div class="soc-stat-value">{{ critical_count }}</div>
+                <div class="soc-stat-footer">Critical severity investigations</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-orange">
+                <div class="soc-stat-top">
+                    <span>High Risk</span>
+                    <span class="soc-stat-icon">▲</span>
+                </div>
+                <div class="soc-stat-value">{{ high_count }}</div>
+                <div class="soc-stat-footer">High severity investigations</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-cyan">
+                <div class="soc-stat-top">
+                    <span>Medium Risk</span>
+                    <span class="soc-stat-icon">◈</span>
+                </div>
+                <div class="soc-stat-value">{{ medium_count }}</div>
+                <div class="soc-stat-footer">Medium severity investigations</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-green">
+                <div class="soc-stat-top">
+                    <span>Low Risk</span>
+                    <span class="soc-stat-icon">✓</span>
+                </div>
+                <div class="soc-stat-value">{{ low_count }}</div>
+                <div class="soc-stat-footer">Low severity investigations</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-blue">
+                <div class="soc-stat-top">
+                    <span>New Investigations</span>
+                    <span class="soc-stat-icon">＋</span>
+                </div>
+                <div class="soc-stat-value">{{ new_count }}</div>
+                <div class="soc-stat-footer">Awaiting analyst review</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-orange">
+                <div class="soc-stat-top">
+                    <span>In Progress</span>
+                    <span class="soc-stat-icon">◷</span>
+                </div>
+                <div class="soc-stat-value">{{ in_progress_count }}</div>
+                <div class="soc-stat-footer">Currently being investigated</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-green">
+                <div class="soc-stat-top">
+                    <span>Resolved</span>
+                    <span class="soc-stat-icon">✓</span>
+                </div>
+                <div class="soc-stat-value">{{ resolved_count }}</div>
+                <div class="soc-stat-footer">Successfully resolved</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-muted">
+                <div class="soc-stat-top">
+                    <span>False Positives</span>
+                    <span class="soc-stat-icon">ⓘ</span>
+                </div>
+                <div class="soc-stat-value">{{ false_positive_count }}</div>
+                <div class="soc-stat-footer">Classified as false positive</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-purple">
+                <div class="soc-stat-top">
+                    <span>Average Risk Score</span>
+                    <span class="soc-stat-icon">◉</span>
+                </div>
+                <div class="soc-stat-value">
+                    {{ "%.2f"|format(average_risk_score) }}
+                    <small>/100</small>
+                </div>
+                <div class="soc-stat-footer">Average investigation score</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="soc-stat-card stat-red">
+                <div class="soc-stat-top">
+                    <span>Highest Risk Score</span>
+                    <span class="soc-stat-icon">↑</span>
+                </div>
+                <div class="soc-stat-value">
+                    {{ highest_risk_score }}
+                    <small>/100</small>
+                </div>
+                <div class="soc-stat-footer">Maximum detected risk score</div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- RISK TREND -->
+    <div class="soc-panel mb-4">
+
+        <div class="soc-panel-header">
+            <div>
+                <h5>Risk Score Trend</h5>
+                <p>Risk scores across analyzed email investigations</p>
+            </div>
+            <span class="soc-chart-label">TREND ANALYSIS</span>
+        </div>
+
+        <div class="soc-chart-container soc-trend-container">
+            <canvas id="riskTrendChart"></canvas>
+        </div>
+
+    </div>
+
+
+    <!-- DISTRIBUTION CHARTS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-6">
+            <div class="soc-panel h-100">
+
+                <div class="soc-panel-header">
+                    <div>
+                        <h5>Risk Distribution</h5>
+                        <p>Investigations grouped by risk severity</p>
+                    </div>
+                    <span class="soc-chart-label">SEVERITY</span>
+                </div>
+
+                <div class="soc-chart-container soc-donut-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="soc-panel h-100">
+
+                <div class="soc-panel-header">
+                    <div>
+                        <h5>Investigation Status</h5>
+                        <p>Current investigation workflow distribution</p>
+                    </div>
+                    <span class="soc-chart-label">WORKFLOW</span>
+                </div>
+
+                <div class="soc-chart-container soc-donut-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- RISK VS STATUS MATRIX -->
+    <div class="soc-panel mb-4">
+
+        <div class="soc-panel-header">
+            <div>
+                <h5>Risk Level vs Investigation Status</h5>
+                <p>Overview of investigation severity and workflow status</p>
+            </div>
+            <span class="soc-chart-label">ANALYST OVERVIEW</span>
+        </div>
+
+        <div class="table-responsive soc-table-wrapper">
+
+            <table class="table soc-table text-center align-middle">
+
+                <thead>
+                    <tr>
+                        <th>RISK LEVEL</th>
+                        {% for status in statuses %}
+                            <th>{{ status }}</th>
+                        {% endfor %}
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for risk in risk_levels %}
+                    <tr>
+                        <td>
+                            {% if risk == "Critical" %}
+                                <span class="soc-risk-label risk-critical">Critical</span>
+                            {% elif risk == "High" %}
+                                <span class="soc-risk-label risk-high">High</span>
+                            {% elif risk == "Medium" %}
+                                <span class="soc-risk-label risk-medium">Medium</span>
+                            {% else %}
+                                <span class="soc-risk-label risk-low">Low</span>
+                            {% endif %}
+                        </td>
+
+                        {% for status in statuses %}
+                            <td>{{ risk_status_counts[risk][status] }}</td>
+                        {% endfor %}
+
+                        <td class="soc-total-cell">
+                            {{ risk_status_counts[risk].values()|sum }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td>TOTAL</td>
+
+                        {% for status in statuses %}
+                            <td>
+                                {{ risk_status_counts.values()
+                                    |map(attribute=status)
+                                    |sum }}
+                            </td>
+                        {% endfor %}
+
+                        <td>{{ total_investigations }}</td>
+                    </tr>
+                </tfoot>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- RECENT INVESTIGATIONS -->
+    <div class="soc-panel mb-4">
+
+        <div class="soc-panel-header">
+            <div>
+                <h5>Recent Investigations</h5>
+                <p>Latest email security investigations</p>
+            </div>
+            <span class="soc-chart-label">LATEST RECORDS</span>
+        </div>
+
+        <div class="table-responsive soc-table-wrapper">
+
+            <table class="table soc-table soc-investigation-table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Sender</th>
+                        <th>Subject</th>
+                        <th>Risk Score</th>
+                        <th>Risk Level</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in recent_investigations %}
+                    <tr>
+
+                        <td class="soc-id-cell">#{{ item.id }}</td>
+
+                        <td class="soc-sender-cell">
+                            {{ item.sender or "Unknown" }}
+                        </td>
+
+                        <td class="soc-subject-cell">
+                            {{ item.subject or "No Subject" }}
+                        </td>
+
+                        <td>
+                            <strong>{{ item.risk_score }}</strong>
+                            <span class="soc-score-max">/100</span>
+                        </td>
+
+                        <td>
+                            {% if item.risk_level == "Critical" %}
+                                <span class="soc-badge badge-critical">Critical</span>
+                            {% elif item.risk_level == "High" %}
+                                <span class="soc-badge badge-high">High</span>
+                            {% elif item.risk_level == "Medium" %}
+                                <span class="soc-badge badge-medium">Medium</span>
+                            {% else %}
+                                <span class="soc-badge badge-low">Low</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.status == "New" %}
+                                <span class="soc-badge badge-new">New</span>
+                            {% elif item.status == "In Progress" %}
+                                <span class="soc-badge badge-progress">In Progress</span>
+                            {% elif item.status == "Resolved" %}
+                                <span class="soc-badge badge-resolved">Resolved</span>
+                            {% elif item.status == "False Positive" %}
+                                <span class="soc-badge badge-false">False Positive</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="soc-date-cell">
+                            {{ item.created_at.strftime("%Y-%m-%d %H:%M")
+                                if item.created_at else "Unknown" }}
+                        </td>
+
+                        <td>
+                            <a href="{{ url_for('analyzer.investigation_details', investigation_id=item.id) }}"
+                               class="btn soc-view-btn">
+                                View →
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="soc-empty-state">
+                                <span>⌕</span>
+                                <h6>No investigations found</h6>
+                                <p>Try changing the reporting period or analyze an email.</p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="soc-dashboard-footer">
+        PHISHLENS SECURITY OPERATIONS CENTER
+        <span>EMAIL THREAT ANALYSIS & INVESTIGATION PLATFORM</span>
+    </div>
+
+</div>
+
+
+<!-- CHART.JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    Chart.defaults.color = "#91a6c2";
+    Chart.defaults.font.family = "Arial, sans-serif";
+
+    const gridColor = "rgba(125, 155, 190, 0.12)";
+
+    // RISK SCORE TREND
+    const riskTrendElement = document.getElementById("riskTrendChart");
+
+    if (riskTrendElement) {
+        new Chart(riskTrendElement, {
+            type: "line",
+            data: {
+                labels: {{ risk_trend_labels | tojson }},
+                datasets: [{
+                    label: "Risk Score",
+                    data: {{ risk_trend_scores | tojson }},
+                    borderColor: "#4c9aff",
+                    backgroundColor: "rgba(76, 154, 255, 0.12)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: "#4c9aff",
+                    pointBorderColor: "#14243b",
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
+                        grid: { color: gridColor },
+                        ticks: { color: "#91a6c2" },
+                        title: {
+                            display: true,
+                            text: "Risk Score",
+                            color: "#91a6c2"
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: "#91a6c2" },
+                        title: {
+                            display: true,
+                            text: "Investigation Date and Time",
+                            color: "#91a6c2"
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "bottom",
+                        labels: { usePointStyle: true, padding: 20 }
+                    },
+                    title: {
+                        display: true,
+                        text: "Email Risk Scores Over Time",
+                        color: "#dceaff",
+                        padding: 15
+                    }
+                }
+            }
+        });
+    }
+
+
+    // RISK DISTRIBUTION
+    const riskElement = document.getElementById("riskChart");
+
+    if (riskElement) {
+        new Chart(riskElement, {
+            type: "doughnut",
+            data: {
+                labels: ["Critical", "High", "Medium", "Low"],
+                datasets: [{
+                    data: [
+                        {{ critical_count }},
+                        {{ high_count }},
+                        {{ medium_count }},
+                        {{ low_count }}
+                    ],
+                    backgroundColor: [
+                        "#ff526d",
+                        "#ffad42",
+                        "#38bdf8",
+                        "#36c991"
+                    ],
+                    borderColor: "#122139",
+                    borderWidth: 4,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "68%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            color: "#b8c9df",
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: "Email Investigation Risk Levels",
+                        color: "#dceaff",
+                        padding: 15
+                    }
+                }
+            }
+        });
+    }
+
+
+    // INVESTIGATION STATUS
+    const statusElement = document.getElementById("statusChart");
+
+    if (statusElement) {
+        new Chart(statusElement, {
+            type: "doughnut",
+            data: {
+                labels: [
+                    "New",
+                    "In Progress",
+                    "Resolved",
+                    "False Positive"
+                ],
+                datasets: [{
+                    data: [
+                        {{ new_count }},
+                        {{ in_progress_count }},
+                        {{ resolved_count }},
+                        {{ false_positive_count }}
+                    ],
+                    backgroundColor: [
+                        "#4c9aff",
+                        "#ffad42",
+                        "#36c991",
+                        "#8795a8"
+                    ],
+                    borderColor: "#122139",
+                    borderWidth: 4,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "68%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            color: "#b8c9df",
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: "Investigation Status",
+                        color: "#dceaff",
+                        padding: 15
+                    }
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+{% endblock %}

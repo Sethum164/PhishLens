@@ -1,0 +1,9 @@
+From: security@example.com
+To: analyst@example.com
+Subject: Account Security Verification
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+Your account requires verification. Please visit https://paypa1.example.com/l=
+ogin to review your account.

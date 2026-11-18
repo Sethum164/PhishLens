@@ -1,0 +1,23 @@
+From: bank@example.com
+To: analyst@example.com
+Reply-To: attacker@fake.example
+Subject: Urgent Account Verification
+Authentication-Results: mx.example.com; spf=fail; dkim=fail; dmarc=fail
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============5839955095054434537=="
+
+--===============5839955095054434537==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Your account requires verification. Visit http://192.0.2.10/login immediately.
+
+--===============5839955095054434537==
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="invoice.exe"
+MIME-Version: 1.0
+
+SGFybWxlc3MgdGVzdCBhdHRhY2htZW50
+
+--===============5839955095054434537==--

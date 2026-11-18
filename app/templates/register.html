@@ -1,0 +1,218 @@
+
+{% extends "base.html" %}
+
+{% block title %}Register | PhishLens{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="register-wrapper mx-auto">
+
+        <div class="row g-0 register-panel">
+
+            <!-- LEFT BRANDING SECTION -->
+            <div class="col-lg-5 register-brand-section">
+
+                <div class="register-brand-content">
+
+                    <div class="register-brand-logo">
+                        <span class="register-logo-icon">⌑</span>
+                        <span><span class="text-primary">Phish</span>Lens</span>
+                    </div>
+
+                    <div class="register-platform-label">
+                        SECURITY OPERATIONS PLATFORM
+                    </div>
+
+                    <h1 class="register-heading">
+                        Start your
+                        <span>security journey.</span>
+                    </h1>
+
+                    <p class="register-description">
+                        Create your PhishLens account and access a
+                        workspace designed for phishing email analysis
+                        and security investigations.
+                    </p>
+
+                    <div class="register-benefits">
+
+                        <div class="register-benefit">
+                            <span>✓</span>
+                            Email Threat Analysis
+                        </div>
+
+                        <div class="register-benefit">
+                            <span>✓</span>
+                            IOC Detection
+                        </div>
+
+                        <div class="register-benefit">
+                            <span>✓</span>
+                            Security Investigations
+                        </div>
+
+                        <div class="register-benefit">
+                            <span>✓</span>
+                            PDF Security Reports
+                        </div>
+
+                    </div>
+
+                    <div class="register-brand-footer">
+                        PHISHLENS · EMAIL SECURITY INTELLIGENCE
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT REGISTRATION FORM -->
+            <div class="col-lg-7 register-form-section">
+
+                <div class="register-form-content">
+
+                    <div class="register-form-icon">👤</div>
+
+                    <h2>Create your account</h2>
+
+                    <p class="register-form-subtitle">
+                        Enter your details to join PhishLens.
+                    </p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show"
+                                 role="alert">
+                                {{ message }}
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+
+                    <form method="POST">
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <div class="mb-3">
+
+                            <label class="form-label" for="username">
+                                Username
+                            </label>
+
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                class="form-control register-input"
+                                placeholder="Choose a username"
+                                required
+                                maxlength="80"
+                                autocomplete="username"
+                            >
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label" for="email">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-control register-input"
+                                placeholder="Enter your email address"
+                                required
+                                maxlength="120"
+                                autocomplete="email"
+                            >
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label" for="password">
+                                    Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    class="form-control register-input"
+                                    placeholder="Create password"
+                                    required
+                                    minlength="8"
+                                    autocomplete="new-password"
+                                >
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label" for="confirm_password">
+                                    Confirm Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    id="confirm_password"
+                                    name="confirm_password"
+                                    class="form-control register-input"
+                                    placeholder="Confirm password"
+                                    required
+                                    minlength="8"
+                                    autocomplete="new-password"
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="register-password-note">
+                            Password must contain at least 8 characters.
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100 register-submit-btn"
+                        >
+                            Create PhishLens Account
+                            <span class="ms-2">→</span>
+                        </button>
+
+                    </form>
+
+                    <div class="register-login-link">
+                        Already have an account?
+                        <a href="{{ url_for('auth.login') }}">
+                            Sign in here
+                        </a>
+                    </div>
+
+                    <div class="register-security-note">
+                        🛡 Your account is protected with secure password hashing.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
