@@ -88,11 +88,9 @@ PhishLens/
 ### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/Sethum164/PhishLens.git
 cd PhishLens
 ```
-
-Replace the placeholder with your actual GitHub repository URL.
 
 ### 2. Create a Virtual Environment
 
@@ -126,7 +124,7 @@ Edit `.env` and configure the required environment variables, including a secure
 
 If optional external threat intelligence integration is enabled, configure its API credentials as required.
 
-**Important:** Never upload your actual `.env` file or API keys to GitHub.
+**Important:** Never upload your actual `.env` file, passwords, database files, or API keys to GitHub.
 
 ### 5. Initialize the Database
 
@@ -160,7 +158,7 @@ Run the complete test suite:
 pytest -v
 ```
 
-The project currently has **39 automated tests**, covering:
+The project includes **39 automated tests**, covering:
 
 - User authentication and registration
 - Email analysis and upload validation
@@ -201,3 +199,5 @@ PhishLens is an educational cybersecurity project. Its analysis results are inte
 ## Author
 
 Developed as a cybersecurity project to explore phishing email analysis, threat detection, IOC extraction, and SOC investigation workflows.
+
+GitHub Repository: https://github.com/Sethum164/PhishLens
